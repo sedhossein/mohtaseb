@@ -1,0 +1,178 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Mohtaseb API documentation"
+host: "127.0.0.1:8080"
+basePath: "/api/v1"
+schemes:
+  - "http"
+paths:
+  /gifts:
+    post:
+      summary: "Apply a gift code to a user's wallet."
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: ApplyGiftCodeRequest
+          schema:
+            $ref: '#/definitions/ApplyGiftCodeRequest'
+      responses:
+        "200":
+          description: "Code applied"
+          schema:
+            $ref: "#/definitions/ApplyGiftCodeResponse"
+        "400":
+          description: "Validation error"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: "Something bad has happened on the server"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /gifts/winners:
+    get:
+      summary: "Get gift code winners. Supports pagination."
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/GetWinnersResponse"
+        "500":
+          description: "Something bad has happened on the server"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /wallets/{id}:
+    get:
+      summary: "Get a wallet by wallet id(=phone)."
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Numeric ID of the wallet to get. (Which is a phone number like 09123456789)
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/WalletResponse"
+        "500":
+          description: "Something bad has happened on the server"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+definitions:
+
+  GiftCodeString:
+    type: "string"
+    description: "a Git code"
+    example: "IRAN2020"
+
+  GiftCode:
+    type: "object"
+    description: "a Git"
+    properties:
+      amount:
+        type: integer
+        example: 10000
+      description:
+        type: string
+        example: "a Gift from Folani"
+
+  Phone:
+    type: "string"
+    description: "an 11 character phone number starting with 09"
+    example: "09123456789"
+
+  ApplyGiftCodeRequest:
+    type: "object"
+    properties:
+      code:
+        $ref: '#/definitions/GiftCodeString'
+      phone:
+        $ref: '#/definitions/Phone'
+
+  ApplyGiftCodeResponse:
+    type: "object"
+    properties:
+      success:
+        type: "boolean"
+        default: true
+      message:
+        type: "string"
+        default: "Code has been applied successfully."
+      data:
+        type: object
+        properties:
+          gift:
+            $ref: '#/definitions/GiftCode'
+
+  GiftCodeWinner:
+    type: object
+    properties:
+      masked_phone:
+        type: string
+        example: "09106***437"
+
+  GetWinnersResponse:
+    type: object
+    properties:
+      success:
+        type: "boolean"
+        default: true
+      message:
+        type: "string"
+        default: "Winner list has been loaded successfully."
+      data:
+        type: object
+        properties:
+          count:
+            type: integer
+            example: 1
+          winners:
+            type: array
+            items:
+              $ref: '#/definitions/GiftCodeWinner'
+
+  Wallet:
+    type: object
+    properties:
+      balance:
+        type: object
+        properties:
+          amount:
+            type: integer
+            example: 220000
+
+  WalletResponse:
+    type: object
+    properties:
+      success:
+        type: "boolean"
+        default: true
+      message:
+        type: "string"
+        default: ""
+      data:
+        type: object
+        properties:
+          wallet:
+            $ref: '#/definitions/Wallet'
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      success:
+        type: boolean
+        default: false
+      message:
+        type: "string"
+        example: "some meaningful message"
